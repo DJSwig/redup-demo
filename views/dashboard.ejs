@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+
+  <!-- Tailwind & Icons -->
+  <link href="/css/tailwind.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet" />
+</head>
+
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen overflow-hidden">
+
+<!-- WRAPPER -->
+<div class="flex h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="hidden md:flex flex-col w-72 bg-slate-900/70 backdrop-blur-md border-r border-slate-800 p-6 space-y-8">
+    <h1 class="text-3xl font-bold text-red-500 tracking-tight">Redup</h1>
+
+    <nav class="space-y-1.5 text-sm">
+      <a href="/dashboard" class="flex items-center gap-3 bg-slate-800/60 px-4 py-3 rounded-lg font-medium hover:bg-red-600/20 transition">
+        <i class="ri-dashboard-line text-red-400 text-lg"></i> Dashboard
+      </a>
+      <a href="/analyzer" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800/50 transition">
+        <i class="ri-brain-line text-slate-400 text-lg"></i> Analyzer
+      </a>
+      <a href="/scheduler" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800/50 transition">
+        <i class="ri-calendar-event-line text-slate-400 text-lg"></i> Scheduler
+      </a>
+      <a href="/analytics" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800/50 transition">
+        <i class="ri-bar-chart-2-line text-slate-400 text-lg"></i> Analytics
+      </a>
+      <a href="/pricing" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-800/50 transition">
+        <i class="ri-star-line text-slate-400 text-lg"></i> Upgrade
+      </a>
+    </nav>
+
+    <div class="space-y-3 flex-1 overflow-y-auto">
+      <h3 class="text-slate-400 text-xs uppercase tracking-wide mb-2">Templates</h3>
+      <div id="templateList" class="space-y-3 pr-1 max-h-[45vh] overflow-y-auto">
+        <% templates.forEach(t => { %>
+          <div class="template bg-slate-800/40 border border-slate-700 rounded-xl p-4 cursor-grab hover:border-red-500/40 hover:bg-slate-800/60 transition" data-id="<%= t.id %>">
+            <p class="font-medium text-white text-sm"><%= t.title %></p>
+            <p class="text-[12px] text-slate-400"><%= t.subreddit %></p>
+          </div>
+        <% }) %>
+      </div>
+      <button class="w-full bg-gradient-to-r from-red-600 to-pink-500 py-2.5 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition mt-2">+ New Template</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- HEADER -->
+    <header class="flex justify-between items-center border-b border-slate-800 bg-slate-900/70 backdrop-blur-md px-6 py-4">
+      <div>
+        <h2 class="text-2xl font-bold text-white">📅 Dashboard</h2>
+        <p class="text-slate-400 text-xs mt-1">Your Reddit growth control center</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <input
+          type="search"
+          placeholder="Search posts…"
+          class="bg-slate-800 border border-slate-700 text-sm rounded-lg px-3 py-2 text-slate-200 placeholder-slate-500 focus:border-red-500 focus:ring-1 focus:ring-red-500 outline-none w-48"
+        />
+        <div class="w-9 h-9 bg-red-500/20 border border-red-500 rounded-full flex items-center justify-center text-red-400 font-semibold">R</div>
+      </div>
+    </header>
+
+    <!-- CONTENT AREA -->
+    <section class="flex-1 overflow-y-auto p-8 space-y-12">
+
+      <!-- QUICK STATS -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-5">
+        <div class="bg-slate-900/60 rounded-2xl shadow-md p-6 text-center">
+          <p class="text-slate-400 text-sm mb-1">Scheduled</p>
+          <p class="text-3xl font-bold text-red-400">28</p>
+        </div>
+        <div class="bg-slate-900/60 rounded-2xl shadow-md p-6 text-center">
+          <p class="text-slate-400 text-sm mb-1">Top-5 Hits</p>
+          <p class="text-3xl font-bold text-pink-400">17</p>
+        </div>
+        <div class="bg-slate-900/60 rounded-2xl shadow-md p-6 text-center">
+          <p class="text-slate-400 text-sm mb-1">Avg CTR</p>
+          <p class="text-3xl font-bold text-purple-400">8.6%</p>
+        </div>
+        <div class="bg-slate-900/60 rounded-2xl shadow-md p-6 text-center">
+          <p class="text-slate-400 text-sm mb-1">Next Post</p>
+          <p class="text-lg text-slate-200">Tomorrow @ 9:00 AM</p>
+        </div>
+      </div>
+
+      <!-- WEEKLY SCHEDULER -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-3xl p-8 shadow-lg">
+        <div class="flex flex-wrap justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold text-white">Weekly Schedule</h3>
+          <button class="px-5 py-2.5 bg-gradient-to-r from-red-600 to-pink-500 rounded-lg text-white text-sm font-semibold hover:scale-105 transition">+ New Post</button>
+        </div>
+        <p class="text-slate-400 text-sm mb-6">Drag posts between days or drop from templates. Adjust times inline.</p>
+
+        <div id="scheduleGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4">
+          <% const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]; %>
+          <% days.forEach(day => { %>
+            <div class="day bg-slate-900/50 border border-slate-800 rounded-xl p-3 transition hover:border-red-500/30" data-day="<%= day %>">
+              <h3 class="text-xs font-semibold text-red-400 mb-2"><%= day %></h3>
+              <div class="post-list min-h-[130px] space-y-2" id="day-<%= day %>">
+                <% demoPosts.filter(p => p.day === day).forEach(p => { %>
+                  <div class="post bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-[13px] cursor-grab hover:border-red-500/40 transition" data-id="<%= p.id %>">
+                    <p class="text-slate-200 font-medium truncate"><%= p.title %></p>
+                    <div class="flex justify-between items-center text-slate-500 mt-1">
+                      <span><%= p.subreddit %></span>
+                      <select class="time-select bg-transparent text-red-400 border border-slate-700 rounded-md text-[11px] px-1 py-0.5 focus:outline-none">
+                        <% ["6:00 AM","8:00 AM","10:00 AM","12:00 PM","2:00 PM","4:00 PM","6:00 PM","8:00 PM"].forEach(t => { %>
+                          <option <%= t === p.time ? 'selected' : '' %>><%= t %></option>
+                        <% }) %>
+                      </select>
+                    </div>
+                  </div>
+                <% }) %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+
+      <!-- ACTIVITY + INSIGHTS -->
+      <div class="grid md:grid-cols-2 gap-8">
+        <div class="bg-slate-900/60 rounded-2xl shadow-md p-6">
+          <h3 class="text-xl font-semibold text-white mb-3">Recent Activity</h3>
+          <ul class="space-y-3 text-sm text-slate-300">
+            <li>✅ Posted to <span class="text-red-400">r/Entrepreneur</span> — “Scaling Update”</li>
+            <li>📈 “Weekly Promo Template” scheduled for <span class="text-pink-400">Thursday</span> 10 AM</li>
+            <li>🧠 Analyzer suggested <span class="text-purple-400">r/Productivity</span> for “AI Workflow Tips”</li>
+            <li>📊 Hit Top-5 on <span class="text-red-400">r/SideProject</span></li>
+          </ul>
+        </div>
+        <div class="bg-slate-900/60 rounded-2xl shadow-md p-6">
+          <h3 class="text-xl font-semibold text-white mb-3">Performance Insights</h3>
+          <p class="text-slate-400 text-sm mb-3">AI summary of your week:</p>
+          <div class="space-y-2 text-sm">
+            <p>🔥 Best subreddit: <span class="text-red-400">r/SideProject</span> (+48 % engagement)</p>
+            <p>📅 Best posting time: <span class="text-pink-400">10:00 AM Tue & Thu</span></p>
+            <p>💬 Avg comments per post: <span class="text-purple-400">37</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="bg-gradient-to-r from-slate-900/70 to-slate-900/40 border border-slate-800 rounded-2xl p-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-md">
+        <div>
+          <h3 class="text-xl font-semibold text-white mb-2">🚀 Ready to boost next week?</h3>
+          <p class="text-slate-400 text-sm">Use Analyzer to find new subreddits and schedule your top posts for peak hours.</p>
+        </div>
+        <a href="/analyzer" class="bg-gradient-to-r from-red-600 to-pink-500 text-white px-6 py-3 rounded-lg text-sm font-semibold shadow-md hover:scale-105 transition">
+          Run Analyzer
+        </a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- SortableJS -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+  document.querySelectorAll(".post-list").forEach(el => {
+    new Sortable(el, {
+      group: "posts",
+      animation: 180,
+      ghostClass: "opacity-50",
+      chosenClass: "sortable-chosen",
+      dragClass: "dragging",
+      onAdd: evt => {
+        const item = evt.item;
+        item.classList.add("bg-slate-800/80", "border-red-500/30");
+        if (!item.querySelector(".time-select")) {
+          const times = ["6:00 AM","8:00 AM","10:00 AM","12:00 PM","2:00 PM","4:00 PM","6:00 PM","8:00 PM"];
+          const dropdown = document.createElement("select");
+          dropdown.className = "time-select bg-transparent text-red-400 border border-slate-700 rounded-md text-[11px] px-1 py-0.5 focus:outline-none";
+          dropdown.innerHTML = times.map(t => `<option>${t}</option>`).join("");
+          const footer = document.createElement("div");
+          footer.className = "flex justify-end mt-2";
+          footer.appendChild(dropdown);
+          item.appendChild(footer);
+          setTimeout(() => dropdown.focus(), 150);
+        }
+      }
+    });
+  });
+
+  new Sortable(document.getElementById("templateList"), {
+    group: { name: "posts", pull: "clone", put: false },
+    sort: false,
+    animation: 150
+  });
+
+  document.addEventListener("change", e => {
+    if (e.target.matches(".time-select")) {
+      const val = e.target.value;
+      e.target.outerHTML = `<p class='text-[11px] text-red-400 mt-1'>🕒 ${val}</p>`;
+      showToast(`Scheduled for ${val}`);
+    }
+  });
+
+  function showToast(msg) {
+    const toast = document.createElement("div");
+    toast.textContent = msg;
+    toast.className = "fixed bottom-5 left-1/2 -translate-x-1/2 bg-red-600 text-white text-xs px-4 py-2 rounded-md shadow-lg opacity-0 transition-opacity duration-300";
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add("opacity-100"), 10);
+    setTimeout(() => toast.classList.remove("opacity-100"), 2000);
+    setTimeout(() => toast.remove(), 2300);
+  }
+</script>
+
+<style>
+  .sortable-chosen {
+    border: 1px dashed rgba(239,68,68,0.6);
+    background: rgba(239,68,68,0.08);
+  }
+</style>
+
+</body>
+</html>
