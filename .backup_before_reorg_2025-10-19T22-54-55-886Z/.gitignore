@@ -16,8 +16,3 @@ logs/
 
 # Build
 public/css/tailwind.css
-data/*.sqlite
-data/*.db
-npm-debug.log*
-package-lock.json.bak
-package.json.bak

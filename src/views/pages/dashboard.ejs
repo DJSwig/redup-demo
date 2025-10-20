@@ -1,0 +1,234 @@
+<%
+  // Safe fallbacks (never self-reference in initializers)
+  const U = typeof user !== "undefined" && user ? user : { name: "Redupper", email: "you@redup.app" };
+  const S = typeof stats !== "undefined" && stats ? stats : { scheduled: 28, queued: 9, hitRate: 0.62, avgUpvotes: 127 };
+
+  // Templates: accept `templates` (preferred) or `tmpl`
+  const TMPL_SRC = (typeof templates !== "undefined" ? templates
+                   : (typeof tmpl !== "undefined" ? tmpl : []));
+  const TMPL = Array.isArray(TMPL_SRC) ? TMPL_SRC : [
+    { id: 101, title: "Show & Tell — Weekly", subreddit: "SideProject" },
+    { id: 102, title: "Product Update — Short", subreddit: "Entrepreneur" },
+    { id: 103, title: "Case Study: X→Y", subreddit: "startup" },
+  ];
+
+  // Demo posts: accept `demoPosts` (preferred) or `posts`
+  const POSTS_SRC = (typeof demoPosts !== "undefined" ? demoPosts
+                   : (typeof posts !== "undefined" ? posts : []));
+  const DEMO = Array.isArray(POSTS_SRC) ? POSTS_SRC : [
+    { id: 1, day: "Mon", title: "AMA: we hit 10k users", subreddit: "Entrepreneur", time: "10:00 AM" },
+    { id: 2, day: "Tue", title: "Before/After UX revamp", subreddit: "design", time: "12:00 PM" },
+    { id: 3, day: "Thu", title: "How we automated onboarding", subreddit: "SaaS", time: "10:00 AM" },
+  ];
+
+  const days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+%>
+
+
+<!-- Fixed header -->
+<%- include('../partials/_header', { user: U, active: 'dashboard' }) %>
+<% if (!reddit) { %>
+  <div class="rounded-xl border border-red-600/40 bg-red-600/10 p-4">
+    <div class="flex items-center justify-between gap-3">
+      <div class="text-sm text-red-200"><strong>Connect Reddit to continue</strong> — scheduling and analytics require a Reddit account.</div>
+      <a href="/connect/reddit?next=<%= encodeURIComponent('/dashboard') %>" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-red-600 to-pink-500 text-white">Connect</a>
+    </div>
+  </div>
+<% } else { %>
+  <div class="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-200">
+    Connected as <span class="font-semibold">u/<%= reddit.username || reddit.display_name || reddit.account_id %></span>.
+  </div>
+<% } %>
+
+<!-- Layout wrapper beneath header (fills remaining height) -->
+<div class="pt-16 h-[calc(100vh-64px)] bg-slate-950">
+
+  <div class="flex h-full">
+    <!-- Sidebar (fixed on md+, drawer on mobile) -->
+    <%- include('../partials/_sidebar', { active: 'dashboard', templates: TMPL }) %>
+
+    <!-- Main panel (scrollable) -->
+    <main class="flex-1 overflow-y-auto">
+      <div class="max-w-7xl mx-auto px-6 py-8 space-y-10">
+
+        <!-- Page header -->
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+              <span class="text-white">Dashboard</span>
+              <span class="ml-2 text-sm align-middle px-2 py-1 rounded-full bg-red-600/15 text-red-300 border border-red-600/30">Live</span>
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">Your Reddit growth control center</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <a href="/analyzer" class="px-4 py-2 rounded-lg bg-slate-900/70 border border-slate-700 text-slate-100 hover:bg-slate-800 transition">Open Analyzer</a>
+            <a href="/scheduler" class="px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-500 text-white font-semibold shadow-md hover:opacity-95 transition">+ New Post</a>
+          </div>
+        </div>
+
+        <!-- Quick stats -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 text-center">
+            <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Scheduled</div>
+            <div class="text-3xl font-extrabold text-red-400"><%= S.scheduled ?? 0 %></div>
+          </div>
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 text-center">
+            <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Top-5 Hits</div>
+            <div class="text-3xl font-extrabold text-pink-400"><%= Math.round((S.hitRate ?? 0) * (S.scheduled ?? 28)) %></div>
+          </div>
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 text-center">
+            <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Avg Upvotes</div>
+            <div class="text-3xl font-extrabold text-purple-400"><%= S.avgUpvotes ?? 0 %></div>
+          </div>
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-6 text-center">
+            <div class="text-slate-400 text-xs uppercase tracking-wide mb-1">Queued</div>
+            <div class="text-3xl font-extrabold text-emerald-400"><%= S.queued ?? 0 %></div>
+          </div>
+        </section>
+
+        <!-- Weekly scheduler -->
+        <section class="rounded-3xl bg-slate-900/60 border border-slate-800 p-6 shadow-lg">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-lg font-semibold">Weekly Schedule</h3>
+            <div class="flex gap-2">
+              <a href="/templates" class="px-3 py-1.5 rounded-lg bg-slate-800/70 border border-slate-700 text-slate-200 hover:bg-slate-800">Templates</a>
+              <a href="/scheduler" class="px-3 py-1.5 rounded-lg bg-gradient-to-r from-red-600 to-pink-500 text-white">Open Scheduler</a>
+            </div>
+          </div>
+          <p class="text-slate-400 text-sm mb-4">Drag posts between days or drop from templates. Adjust times inline.</p>
+
+          <div id="scheduleGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+            <% days.forEach(day => { %>
+              <div class="day rounded-xl bg-slate-900/50 border border-slate-800 p-3 hover:border-red-500/30 transition" data-day="<%= day %>">
+                <h4 class="text-xs font-semibold text-red-400 mb-2"><%= day %></h4>
+                <div class="post-list min-h-[130px] space-y-2" id="day-<%= day %>">
+                  <% DEMO.filter(p => p.day === day).forEach(p => { %>
+                    <div class="post bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-[13px] cursor-grab hover:border-red-500/40 transition" data-id="<%= p.id %>">
+                      <p class="text-slate-200 font-medium truncate"><%= p.title %></p>
+                      <div class="flex justify-between items-center text-slate-500 mt-1">
+                        <span>r/<%= p.subreddit %></span>
+                        <select class="time-select bg-transparent text-red-400 border border-slate-700 rounded-md text-[11px] px-1 py-0.5 focus:outline-none">
+                          <% ["6:00 AM","8:00 AM","10:00 AM","12:00 PM","2:00 PM","4:00 PM","6:00 PM","8:00 PM"].forEach(t => { %>
+                            <option <%= t === p.time ? 'selected' : '' %>><%= t %></option>
+                          <% }) %>
+                        </select>
+                      </div>
+                    </div>
+                  <% }) %>
+                </div>
+              </div>
+            <% }) %>
+          </div>
+        </section>
+
+        <!-- Activity & Insights -->
+        <section class="grid md:grid-cols-2 gap-6">
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-6">
+            <h3 class="text-lg font-semibold mb-3">Recent Activity</h3>
+            <ul class="space-y-3 text-sm text-slate-300">
+              <li>✅ Posted to <span class="text-red-400">r/Entrepreneur</span> — “Scaling Update”</li>
+              <li>📈 “Weekly Promo Template” scheduled for <span class="text-pink-400">Thursday</span> 10 AM</li>
+              <li>🧠 Analyzer suggested <span class="text-purple-400">r/Productivity</span> for “AI Workflow Tips”</li>
+              <li>🏆 Hit Top-5 on <span class="text-red-400">r/SideProject</span></li>
+            </ul>
+          </div>
+          <div class="rounded-2xl bg-slate-900/60 border border-slate-800 p-6">
+            <h3 class="text-lg font-semibold mb-3">Performance Insights</h3>
+            <p class="text-slate-400 text-sm mb-3">AI summary of your week</p>
+            <div class="space-y-2 text-sm">
+              <p>🔥 Best subreddit: <span class="text-red-400">r/SideProject</span> (+48% engagement)</p>
+              <p>🕘 Best time: <span class="text-pink-400">Tue & Thu, 10:00 AM</span></p>
+              <p>💬 Avg comments/post: <span class="text-purple-400">37</span></p>
+            </div>
+          </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="rounded-2xl bg-gradient-to-r from-slate-900/70 to-slate-900/40 border border-slate-800 p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 class="text-xl font-semibold">🚀 Ready to boost next week?</h3>
+            <p class="text-slate-400 text-sm mt-1">Use Analyzer to find new subs and schedule your top posts for peak hours.</p>
+          </div>
+          <a href="/analyzer" class="px-5 py-3 rounded-lg text-white bg-gradient-to-r from-red-600 to-pink-500 font-semibold shadow-md hover:opacity-95 transition">Run Analyzer</a>
+        </section>
+
+      </div>
+      <%- include('../partials/_footer') %>
+    </main>
+  </div>
+</div>
+
+<!-- Vendor -->
+<link href="https://cdn.jsdelivr.net/npm/remixicon/fonts/remixicon.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+
+<!-- Page JS -->
+<script>
+  // Sidebar drawer
+  (() => {
+    const drawer = document.getElementById("sidebarDrawer");
+    const overlay = document.getElementById("sidebarOverlay");
+    const openBtn = document.querySelector("[data-open-sidebar]");
+    const closeBtn = document.querySelector("[data-close-sidebar]");
+    function open(){ drawer?.classList.remove("-translate-x-full"); overlay?.classList.remove("hidden"); document.body.style.overflow="hidden"; }
+    function close(){ drawer?.classList.add("-translate-x-full"); overlay?.classList.add("hidden"); document.body.style.overflow=""; }
+    openBtn?.addEventListener("click", open);
+    closeBtn?.addEventListener("click", close);
+    overlay?.addEventListener("click", close);
+    document.addEventListener("keydown", e => { if (e.key === "Escape") close(); });
+  })();
+
+  // Drag & drop
+  document.querySelectorAll(".post-list").forEach(el => {
+    new Sortable(el, {
+      group: "posts",
+      animation: 180,
+      ghostClass: "opacity-50",
+      chosenClass: "sortable-chosen",
+      dragClass: "dragging",
+      onAdd: evt => {
+        const item = evt.item;
+        item.classList.add("bg-slate-800/80", "border-red-500/30");
+        if (!item.querySelector(".time-select")) {
+          const times = ["6:00 AM","8:00 AM","10:00 AM","12:00 PM","2:00 PM","4:00 PM","6:00 PM","8:00 PM"];
+          const dropdown = document.createElement("select");
+          dropdown.className = "time-select bg-transparent text-red-400 border border-slate-700 rounded-md text-[11px] px-1 py-0.5 focus:outline-none";
+          dropdown.innerHTML = times.map(t => `<option>${t}</option>`).join("");
+          const footer = document.createElement("div");
+          footer.className = "flex justify-end mt-2";
+          footer.appendChild(dropdown);
+          item.appendChild(footer);
+          setTimeout(() => dropdown.focus(), 150);
+        }
+      }
+    });
+  });
+
+  const tmplList = document.getElementById("templateList");
+  if (tmplList) {
+    new Sortable(tmplList, { group: { name: "posts", pull: "clone", put: false }, sort: false, animation: 150 });
+  }
+
+  // Handle time select visual
+  document.addEventListener("change", e => {
+    if (e.target.matches(".time-select")) {
+      const val = e.target.value;
+      e.target.outerHTML = `<p class='text-[11px] text-red-400 mt-1'>🕒 ${val}</p>`;
+      showToast(`Scheduled for ${val}`);
+    }
+  });
+
+  function showToast(msg) {
+    const toast = document.createElement("div");
+    toast.textContent = msg;
+    toast.className = "fixed bottom-5 left-1/2 -translate-x-1/2 bg-red-600 text-white text-xs px-4 py-2 rounded-md shadow-lg opacity-0 transition-opacity duration-300 z-[60]";
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add("opacity-100"), 10);
+    setTimeout(() => toast.classList.remove("opacity-100"), 2000);
+    setTimeout(() => toast.remove(), 2300);
+  }
+</script>
+
+<style>
+  .sortable-chosen { border: 1px dashed rgba(239,68,68,0.6); background: rgba(239,68,68,0.08); }
+</style>

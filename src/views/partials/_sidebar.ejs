@@ -1,0 +1,59 @@
+<!-- Mobile overlay -->
+<div id="sidebarOverlay" class="fixed inset-0 z-40 bg-black/60 hidden md:hidden"></div>
+
+<!-- Drawer / Sidebar (fixed on md+) -->
+<aside id="sidebarDrawer"
+  class="fixed z-50 left-0 top-0 h-screen w-72 -translate-x-full transition-transform
+         md:top-16 md:h-[calc(100vh-64px)] md:w-64 md:translate-x-0
+         bg-slate-900/70 backdrop-blur-md border-r border-slate-800 flex flex-col">
+
+  <!-- Mobile header inside drawer -->
+  <div class="h-16 px-4 border-b border-slate-800 flex items-center justify-between md:hidden">
+    <h1 class="text-2xl font-bold text-red-500 tracking-tight">Redup</h1>
+    <button type="button" data-close-sidebar class="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 text-slate-300"><i class="ri-close-line"></i></button>
+  </div>
+
+  <div class="p-6 space-y-6 flex-1 overflow-y-auto">
+    <h1 class="hidden md:block text-3xl font-bold text-red-500 tracking-tight">Redup</h1>
+
+    <nav class="space-y-1.5 text-sm">
+      <a href="/dashboard" class="flex items-center gap-3 px-4 py-3 rounded-lg transition border
+        <%= active==='dashboard' ? 'bg-slate-800/60 border-red-600/30 text-white' : 'hover:bg-slate-800/50 border-transparent text-slate-200' %>">
+        <i class="ri-dashboard-line text-red-400 text-lg"></i> Dashboard
+      </a>
+      <a href="/analyzer" class="flex items-center gap-3 px-4 py-3 rounded-lg transition border
+        <%= active==='analyzer' ? 'bg-slate-800/60 border-red-600/30 text-white' : 'hover:bg-slate-800/50 border-transparent text-slate-200' %>">
+        <i class="ri-brain-line text-slate-400 text-lg"></i> Analyzer
+      </a>
+      <a href="/scheduler" class="flex items-center gap-3 px-4 py-3 rounded-lg transition border
+        <%= active==='scheduler' ? 'bg-slate-800/60 border-red-600/30 text-white' : 'hover:bg-slate-800/50 border-transparent text-slate-200' %>">
+        <i class="ri-calendar-event-line text-slate-400 text-lg"></i> Scheduler
+      </a>
+      <a href="/analytics" class="flex items-center gap-3 px-4 py-3 rounded-lg transition border
+        <%= active==='analytics' ? 'bg-slate-800/60 border-red-600/30 text-white' : 'hover:bg-slate-800/50 border-transparent text-slate-200' %>">
+        <i class="ri-bar-chart-2-line text-slate-400 text-lg"></i> Analytics
+      </a>
+      <a href="/pricing" class="flex items-center gap-3 px-4 py-3 rounded-lg transition hover:bg-slate-800/50 text-slate-200">
+        <i class="ri-star-line text-slate-400 text-lg"></i> Upgrade
+      </a>
+    </nav>
+
+    <div class="space-y-3">
+      <h3 class="text-slate-400 text-xs uppercase tracking-wide">Templates</h3>
+      <div id="templateList" class="space-y-3 pr-1 max-h-[45vh] overflow-y-auto">
+        <% (templates || []).forEach(t => { %>
+          <div class="template bg-slate-800/40 border border-slate-700 rounded-xl p-4 cursor-grab hover:border-red-500/40 hover:bg-slate-800/60 transition" data-id="<%= t.id %>">
+            <p class="font-medium text-white text-sm truncate"><%= t.title %></p>
+            <p class="text-[12px] text-slate-400">r/<%= t.subreddit %></p>
+          </div>
+        <% }) %>
+        <% if (!(templates || []).length) { %>
+          <div class="text-sm text-slate-500">No templates yet.</div>
+        <% } %>
+      </div>
+      <a href="/templates/new" class="block text-center bg-gradient-to-r from-red-600 to-pink-500 py-2.5 rounded-lg text-white text-sm font-semibold hover:opacity-90 transition mt-1">
+        + New Template
+      </a>
+    </div>
+  </div>
+</aside>

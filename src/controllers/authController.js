@@ -1,0 +1,1 @@
+export const login = (req, res) => res.redirect("/"); export const logout = (req, res) => { try{ req.logout?.(); }catch{} res.redirect("/"); };

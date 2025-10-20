@@ -1,0 +1,209 @@
+<!-- src/views/pages/index.ejs -->
+<% const Title = (typeof title !== 'undefined' ? title : 'Redup — Post Smarter. Rank Higher.'); %>
+
+<!-- HERO -->
+<section class="relative overflow-hidden bg-dark">
+  <div class="absolute inset-0 pointer-events-none" style="background-image: <%= ` ${"radial-gradient(650px 300px at 20% 20%, rgba(239,68,68,0.25), transparent 40%), radial-gradient(800px 400px at 80% 80%, rgba(239,68,68,0.15), transparent 50%)"} ` %>;"></div>
+
+  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+    <div class="grid lg:grid-cols-2 gap-10 items-center">
+      <div>
+        <p class="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-slate-300/80 border border-slate-700/50 rounded-full px-3 py-1 mb-4">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Live on Staging — Demo-Ready
+        </p>
+
+        <h1 class="font-space text-4xl sm:text-5xl lg:text-6xl font-black leading-tight text-slate-50">
+          Post Smarter. <span class="text-accent">Rank Higher.</span>
+        </h1>
+
+        <p class="mt-5 text-slate-300/90 text-lg leading-relaxed max-w-2xl">
+          Redup is your AI-powered Reddit growth studio—analyzer, scheduler, and analytics in one slick dashboard.
+          Find the right subreddits, auto-polish headlines, schedule in your timezone, and track what actually wins.
+        </p>
+
+        <div class="mt-8 flex flex-col sm:flex-row gap-3">
+          <a href="/pricing"
+             class="inline-flex justify-center items-center gap-2 px-5 py-3 rounded-xl bg-accent text-white font-semibold shadow-glow hover:opacity-90 transition">
+            Start free
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </a>
+          <a href="/analyzer"
+             class="inline-flex justify-center items-center gap-2 px-5 py-3 rounded-xl bg-slate-800 text-slate-100 border border-slate-700 hover:bg-slate-700 transition">
+            Try the Analyzer
+          </a>
+          <button type="button" data-open-modal="auth"
+                  class="inline-flex justify-center items-center gap-2 px-5 py-3 rounded-xl bg-slate-800 text-slate-100 border border-slate-700 hover:bg-slate-700 transition">
+            Sign in / Create account
+          </button>
+        </div>
+
+        <div class="mt-6 flex items-center gap-4 text-sm text-slate-400">
+          <div class="flex -space-x-2">
+            <span class="w-8 h-8 rounded-full bg-slate-700 border border-slate-600"></span>
+            <span class="w-8 h-8 rounded-full bg-slate-700 border border-slate-600"></span>
+            <span class="w-8 h-8 rounded-full bg-slate-700 border border-slate-600"></span>
+          </div>
+          <span>Join creators scheduling posts every day</span>
+        </div>
+      </div>
+
+      <!-- Mock device / screenshot frame -->
+      <div class="relative">
+        <div class="rounded-2xl bg-slate-900/70 border border-slate-700/40 p-4 shadow-xl backdrop-blur">
+          <div class="aspect-[16/10] rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/40 relative overflow-hidden">
+            <div class="absolute inset-0 p-4 sm:p-6">
+              <div class="flex items-center gap-2">
+                <span class="h-3 w-3 rounded-full bg-rose-500"></span>
+                <span class="h-3 w-3 rounded-full bg-amber-400"></span>
+                <span class="h-3 w-3 rounded-full bg-emerald-500"></span>
+              </div>
+              <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-2 rounded-lg bg-slate-800/60 border border-slate-700/50 p-4">
+                  <div class="h-6 w-40 bg-slate-700/80 rounded mb-3"></div>
+                  <div class="h-4 w-3/5 bg-slate-700/60 rounded mb-2"></div>
+                  <div class="h-4 w-2/5 bg-slate-700/60 rounded mb-4"></div>
+                  <div class="grid grid-cols-3 gap-2 mt-2">
+                    <div class="h-24 bg-slate-800/80 rounded"></div>
+                    <div class="h-24 bg-slate-800/80 rounded"></div>
+                    <div class="h-24 bg-slate-800/80 rounded"></div>
+                  </div>
+                </div>
+                <div class="rounded-lg bg-slate-800/60 border border-slate-700/50 p-4">
+                  <div class="h-4 w-2/3 bg-slate-700/60 rounded mb-3"></div>
+                  <div class="space-y-2">
+                    <div class="h-3 w-full bg-slate-700/40 rounded"></div>
+                    <div class="h-3 w-5/6 bg-slate-700/40 rounded"></div>
+                    <div class="h-3 w-4/6 bg-slate-700/40 rounded"></div>
+                  </div>
+                  <div class="mt-4 h-10 rounded bg-accent/90 shadow-glow animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+            <div class="absolute -bottom-6 -left-6 w-24 h-24 rounded-full bg-accent/20 blur-2xl"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF / STATS -->
+<section class="bg-slate-950/80 border-y border-slate-800/60">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="grid sm:grid-cols-3 gap-6 text-center">
+      <div>
+        <div class="text-3xl font-bold text-slate-50">92%</div>
+        <div class="text-slate-400 text-sm">post timing accuracy</div>
+      </div>
+      <div>
+        <div class="text-3xl font-bold text-slate-50">+38%</div>
+        <div class="text-slate-400 text-sm">avg engagement lift</div>
+      </div>
+      <div>
+        <div class="text-3xl font-bold text-slate-50">4.9/5</div>
+        <div class="text-slate-400 text-sm">creator satisfaction</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES (unchanged) -->
+<section class="bg-dark">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <h2 class="font-space text-3xl sm:text-4xl font-bold text-slate-50 text-center">Everything you need to win on Reddit</h2>
+    <p class="text-center mt-3 text-slate-400 max-w-2xl mx-auto">Analyzer, Scheduler, and Analytics—built to help you rank in Hot, not guess.</p>
+
+    <div class="mt-10 grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-5 hover:border-slate-700 transition">
+        <div class="w-10 h-10 rounded-lg bg-accent/20 text-accent grid place-items-center mb-4 shadow-glow">🧠</div>
+        <h3 class="font-semibold text-slate-100">Post Analyzer</h3>
+        <p class="mt-2 text-slate-400 text-sm">Subreddit recommendations, smart title rewrites, flair/rule checks, and a 0–100 Virality Score.</p>
+        <a href="/analyzer" class="mt-3 inline-block text-accent hover:underline text-sm">Try it →</a>
+      </div>
+      <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-5 hover:border-slate-700 transition">
+        <div class="w-10 h-10 rounded-lg bg-accent/20 text-accent grid place-items-center mb-4 shadow-glow">📅</div>
+        <h3 class="font-semibold text-slate-100">Scheduler Dashboard</h3>
+        <p class="mt-2 text-slate-400 text-sm">Drag & drop weekly calendar, templates, smart posting hours, drafts & queues.</p>
+        <a href="/scheduler" class="mt-3 inline-block text-accent hover:underline text-sm">Schedule a post →</a>
+      </div>
+      <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-5 hover:border-slate-700 transition">
+        <div class="w-10 h-10 rounded-lg bg-accent/20 text-accent grid place-items-center mb-4 shadow-glow">📊</div>
+        <h3 class="font-semibold text-slate-100">Analytics & Insights</h3>
+        <p class="mt-2 text-slate-400 text-sm">Engagement overview, time heatmap, hit rate, top subreddits, and weekly AI reports.</p>
+        <a href="/analytics" class="mt-3 inline-block text-accent hover:underline text-sm">See insights →</a>
+      </div>
+      <div class="rounded-xl bg-slate-900/60 border border-slate-800 p-5 hover:border-slate-700 transition">
+        <div class="w-10 h-10 rounded-lg bg-accent/20 text-accent grid place-items-center mb-4 shadow-glow">🎨</div>
+        <h3 class="font-semibold text-slate-100">Media Enhancer</h3>
+        <p class="mt-2 text-slate-400 text-sm">Auto-crop for each sub, smart thumbnail picker, captions/overlays, and compression optimizer.</p>
+        <a href="/analyzer" class="mt-3 inline-block text-accent hover:underline text-sm">Enhance media →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- (rest of sections unchanged: split showcase, pro features, testimonials, FAQ, footer) -->
+
+<!-- ===== Auth Modal ===== -->
+<div id="authModal" class="hidden fixed inset-0 z-50">
+  <button id="authOverlay" class="absolute inset-0 bg-black/60" aria-label="Close login modal"></button>
+  <div class="relative mx-auto mt-24 w-[92%] max-w-md rounded-2xl bg-slate-900 border border-slate-700 p-6 shadow-2xl">
+    <div class="flex items-start justify-between">
+      <h3 class="text-lg font-semibold text-slate-100">Sign in / Create account</h3>
+      <button type="button" data-close-modal class="text-slate-400 hover:text-slate-200">✕</button>
+    </div>
+
+    <p class="mt-2 text-sm text-slate-400">Choose a provider to continue.</p>
+
+    <div class="mt-4 grid gap-2">
+      <!-- Discord (working now) -->
+      <a href="/auth/discord" class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 rounded-lg bg-[#5865F2] text-white font-medium">
+        <span>Continue with Discord</span>
+      </a>
+      <!-- Google (wire later) -->
+      <a href="/auth/google" class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 rounded-lg bg-white text-slate-900 font-medium border border-slate-300">
+        <span>Continue with Google</span>
+      </a>
+      <!-- Reddit (wire later) -->
+      <a href="/auth/reddit" class="w-full inline-flex justify-center items-center gap-2 px-4 py-2 rounded-lg bg-[#FF4500] text-white font-medium">
+        <span>Continue with Reddit</span>
+      </a>
+    </div>
+
+    <div class="mt-5">
+      <div class="text-center text-xs uppercase tracking-widest text-slate-500">or</div>
+      <form class="mt-3 grid gap-2" method="post" action="/auth/email/start">
+        <label class="text-sm text-slate-300" for="email">Continue with email</label>
+        <input id="email" name="email" type="email" required
+               class="w-full rounded-lg bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-accent"
+               placeholder="you@name.com">
+        <button class="mt-1 inline-flex justify-center items-center gap-2 px-4 py-2 rounded-lg bg-accent text-white font-semibold shadow-glow">
+          Continue
+        </button>
+      </form>
+    </div>
+
+    <p class="mt-4 text-xs text-slate-500 text-center">
+      By continuing you agree to our <a class="underline hover:text-slate-300" href="/terms">Terms</a> and <a class="underline hover:text-slate-300" href="/privacy">Privacy</a>.
+    </p>
+  </div>
+</div>
+
+<!-- Modal script (lightweight) -->
+<script>
+  (() => {
+    const $modal = document.getElementById("authModal");
+    const openBtns = document.querySelectorAll("[data-open-modal='auth']");
+    const closeBtns = document.querySelectorAll("[data-close-modal]");
+    const overlay = document.getElementById("authOverlay");
+
+    function open() { $modal?.classList.remove("hidden"); document.body.style.overflow = "hidden"; }
+    function close() { $modal?.classList.add("hidden"); document.body.style.overflow = ""; }
+
+    openBtns.forEach(b => b.addEventListener("click", open));
+    closeBtns.forEach(b => b.addEventListener("click", close));
+    overlay?.addEventListener("click", close);
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+  })();
+</script>
