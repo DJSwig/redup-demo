@@ -1,0 +1,43 @@
+<%- include('../partials/_header', { user, active: 'settings' }) %>
+
+<div class="pt-16 h-[calc(100vh-64px)] bg-slate-950">
+  <div class="max-w-3xl mx-auto px-6 py-10">
+    <h1 class="text-2xl md:text-3xl font-extrabold text-white">Account Connections</h1>
+    <p class="text-slate-400 text-sm mt-1">Connect your Reddit account to schedule and publish.</p>
+
+    <div class="mt-6 rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+      <div class="flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 grid place-items-center rounded-xl bg-red-500/20 border border-red-500/30 text-red-300">
+            <i class="ri-reddit-line text-lg"></i>
+          </div>
+          <div>
+            <div class="font-semibold text-slate-100">Reddit</div>
+            <% if (reddit) { %>
+              <div class="text-sm text-slate-400">Connected as <span class="text-red-400">u/<%= reddit.username || reddit.display_name || reddit.account_id %></span></div>
+            <% } else { %>
+              <div class="text-sm text-slate-400">Not connected</div>
+            <% } %>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <% if (reddit) { %>
+            <form method="post" action="/auth/reddit/disconnect">
+              <button class="px-3 py-2 rounded-lg border border-slate-700 text-slate-200 hover:bg-slate-800">Disconnect</button>
+            </form>
+            <a href="<%= next || '/dashboard' %>" class="px-3 py-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-500 text-white">Continue</a>
+          <% } else { %>
+            <a href="/auth/reddit?next=<%= encodeURIComponent(next || '/dashboard') %>" class="px-3 py-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-500 text-white">Connect Reddit</a>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10">
+      <a href="<%= next || '/dashboard' %>" class="text-sm text-slate-400 hover:text-slate-200">← Back</a>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/_footer') %>

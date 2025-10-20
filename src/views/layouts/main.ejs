@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= typeof title !== 'undefined' ? title + ' — Redup' : 'Redup' %></title>
+    <link rel="stylesheet" href="/css/tailwind.css">
+  </head>
+  <body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+    <%- body %>  <!-- 🔧 express-ejs-layouts injects your page here -->
+    <script src="/js/main.js"></script>
+  </body>
+</html>

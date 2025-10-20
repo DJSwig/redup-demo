@@ -1,0 +1,99 @@
+// src/routes/analyzer.js
+import { Router } from "express";
+import authRequired from "../middlewares/authRequired.js";
+import { analyzePost } from "../services/analyzerService.js";
+import { getRedditAccount, getDiscordAccount } from "../services/accountsService.js";
+
+const router = Router();
+
+/**
+ * Safe/optional templates loader.
+ * Quietly returns [] if the module/table isn’t ready so the page still renders.
+ */
+async function loadTemplatesFor(user) {
+  try {
+    const mod = await import("../services/templatesService.js").catch(() => null);
+    if (mod?.listTemplatesForUser) {
+      const rows = await mod.listTemplatesForUser(user);
+      return Array.isArray(rows) ? rows : [];
+    }
+  } catch (_) {}
+  return [];
+}
+
+/**
+ * GET /analyzer — page
+ */
+router.get("/", authRequired, async (req, res, next) => {
+  try {
+    const [reddit, discord, templates] = await Promise.all([
+      getRedditAccount(req.user.id).catch(() => null),
+      getDiscordAccount(req.user.id).catch(() => null),
+      loadTemplatesFor(req.user),
+    ]);
+
+    res.render("pages/analyzer", {
+      title: "Post Analyzer",
+      user: req.user,
+      reddit,
+      discord,
+      templates,
+      active: "analyzer",
+      next: req.originalUrl,
+    });
+  } catch (e) {
+    next(e);
+  }
+});
+
+/**
+ * POST /analyzer — analyze content
+ */
+router.post("/", authRequired, async (req, res) => {
+  try {
+    // Parse and sanitize inputs
+    const rawSubreddits = String(req.body.subreddits || "");
+    const seedSubreddits = rawSubreddits
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, 25);
+
+    const input = {
+      title: String(req.body.title || "").trim().slice(0, 300),
+      content: String(req.body.content || "").trim().slice(0, 10_000),
+      link: String(req.body.link || "").trim().slice(0, 2048),
+      goal: String(req.body.goal || "discussion").trim(),
+      tone: String(req.body.tone || "friendly").trim(),
+      audience: String(req.body.audience || "").trim().slice(0, 500),
+      seedSubreddits,
+      tz: process.env.SCHEDULER_TZ || "America/Detroit",
+    };
+
+    if (!input.title) {
+      return res.status(400).json({ ok: false, error: "Title is required." });
+    }
+
+    // Optional: log seeds clearly in server console
+    /* eslint-disable no-console */
+    if (seedSubreddits.length) {
+      console.log("\n[Analyzer] Seed subreddits (user:", req.user?.id, ")");
+      seedSubreddits.forEach((s, i) => console.log(`  ${i + 1}. ${s}`));
+      console.log("");
+    }
+
+    // If available, pass Reddit OAuth token for strict validation/compliance & discovery
+    const reddit = await getRedditAccount(req.user.id).catch(() => null);
+    const redditAccessToken = reddit?.accessToken || null;
+
+    const result = await analyzePost(input, redditAccessToken);
+    return res.json({ ok: true, data: result });
+  } catch (e) {
+    console.error(e);
+    return res
+      .status(500)
+      .json({ ok: false, error: e?.message || "Analyzer failed" });
+  }
+});
+
+export default router;

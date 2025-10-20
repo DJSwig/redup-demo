@@ -1,0 +1,681 @@
+<!-- src/views/pages/analyzer.ejs -->
+<% const Title = typeof title !== 'undefined' ? title : 'Post Analyzer'; %>
+
+<%- include('../partials/_header', { user, reddit, discord, active: 'analyzer', next, title: Title }) %>
+<%- include('../partials/_sidebar', { active: 'analyzer', templates: (typeof templates !== 'undefined' ? templates : []) }) %>
+
+<style>
+  :root { --header-offset: 128px; }
+  .app-main { padding-top: clamp(112px, var(--header-offset), 160px); }
+  .muted { color: #94a3b8; }
+  .cz-card { transition: background-color .15s ease, border-color .15s ease; }
+  .cz-card:hover { background-color: rgba(15,23,42,.6); border-color: rgba(51,65,85,.8); }
+</style>
+
+<main class="app-main pt-28 md:pt-32 md:pl-72 pb-24">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+    <!-- HERO -->
+    <section class="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900/80 to-slate-900/40 p-5 md:p-6">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div class="space-y-1">
+          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-50">Post Analyzer</h1>
+          <p class="text-slate-400 text-sm">Sharper titles, smarter subs, and real rule checks—no guesses.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="/scheduler" class="px-4 py-2 rounded-lg bg-gradient-to-r from-red-600 to-pink-500 text-white shadow-md hover:opacity-95">Send to Scheduler</a>
+          <a href="/analytics" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-100 hover:bg-slate-800/80">View Analytics</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- GRID -->
+    <div class="mt-6 grid grid-cols-12 gap-6">
+
+      <!-- LEFT: INPUTS -->
+      <aside class="col-span-12 lg:col-span-4">
+        <form id="analyzeForm" class="sticky top-[calc(var(--header-offset)+16px)] space-y-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-4" novalidate>
+          <!-- Title -->
+          <div>
+            <div class="flex items-center justify-between">
+              <label for="titleInput" class="text-[12px] text-slate-400">Title</label>
+              <button type="button" id="improveTitleBtn" class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md bg-gradient-to-r from-red-600 to-pink-500 text-white hover:opacity-95">
+                ✨ Improve Title
+              </button>
+            </div>
+            <input id="titleInput" name="title" required maxlength="300"
+              class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+              placeholder="e.g., We automated our Reddit workflow (and what broke)" />
+            <div class="mt-1 flex flex-wrap gap-2">
+              <button type="button" data-transform="shorten"  class="px-2 py-1 text-xs rounded-md border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-800/70">Shorten</button>
+              <button type="button" data-transform="numbers"  class="px-2 py-1 text-xs rounded-md border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-800/70">Add numbers</button>
+              <button type="button" data-transform="question" class="px-2 py-1 text-xs rounded-md border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-800/70">Ask a question</button>
+              <button type="button" data-transform="brackets" class="px-2 py-1 text-xs rounded-md border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-800/70">Add context […]</button>
+            </div>
+          </div>
+
+          <!-- Body -->
+          <div>
+            <div class="flex items-center justify-between">
+              <label for="contentInput" class="text-[12px] text-slate-400">Body (optional)</label>
+              <button type="button" id="improveBodyBtn" class="inline-flex items-center gap-1.5 text-xs px-2 py-1 rounded-md border border-slate-700 bg-slate-800 text-slate-100 hover:bg-slate-800/80">✨ Improve Body</button>
+            </div>
+            <textarea id="contentInput" name="content" rows="6"
+              class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+              placeholder="Paste your draft… keep paragraphs short, use bullets for clarity."></textarea>
+          </div>
+
+          <div>
+            <label for="linkInput" class="text-[12px] text-slate-400">External link (optional)</label>
+            <input id="linkInput" name="link" type="url" placeholder="https://…"
+              class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label for="goalSelect" class="text-[12px] text-slate-400">Goal</label>
+              <select id="goalSelect" name="goal" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="discussion">Discussion</option>
+                <option value="traffic">Traffic</option>
+                <option value="announcement">Announcement</option>
+                <option value="feedback">Feedback</option>
+                <option value="showcase">Showcase</option>
+              </select>
+            </div>
+            <div>
+              <label for="toneSelect" class="text-[12px] text-slate-400">Tone</label>
+              <select id="toneSelect" name="tone" class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="friendly">Friendly</option>
+                <option value="professional">Professional</option>
+                <option value="witty">Witty</option>
+                <option value="curious">Curious</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label for="audienceInput" class="text-[12px] text-slate-400">Audience (optional)</label>
+            <input id="audienceInput" name="audience" maxlength="500" placeholder="e.g., indie hackers, bootstrappers, devtools users"
+              class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500" />
+          </div>
+
+          <div>
+            <label for="subsInput" class="text-[12px] text-slate-400">Seed subreddits (optional)</label>
+            <input id="subsInput" name="subreddits" placeholder="r/SideProject, r/Entrepreneur"
+              class="mt-1 w-full rounded-lg bg-slate-950 border border-slate-800 px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-red-500" />
+          </div>
+
+          <div class="flex items-center gap-2 pt-1">
+            <button id="analyzeBtn" type="submit"
+              class="flex-1 inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 text-white px-4 py-2.5 font-semibold shadow hover:opacity-95">
+              <span class="btn-text">Analyze</span>
+              <span class="btn-spinner hidden w-4 h-4 border-2 border-white/70 border-t-transparent rounded-full animate-spin"></span>
+            </button>
+          </div>
+
+          <div class="rounded-lg border border-slate-800 bg-slate-950/60 p-3">
+            <p class="text-xs text-slate-400">Tip: Numbers, brackets, or a question often add <strong>+5–15</strong> title strength. Aim for 20–80 chars.</p>
+          </div>
+        </form>
+      </aside>
+
+      <!-- RIGHT: RESULTS -->
+      <section class="col-span-12 lg:col-span-8 space-y-6 relative" id="resultsWrap">
+        <!-- Thinking -->
+        <div id="thinking" class="hidden rounded-xl border border-slate-800 bg-slate-900/70 p-4" role="status" aria-live="polite">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 animate-pulse"></span>
+            <p class="text-sm text-slate-300">Analyzing your post…</p>
+          </div>
+          <div class="mt-3 h-2 rounded bg-slate-800 overflow-hidden">
+            <div id="thinkingBar" class="h-full w-0 bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-500 transition-all duration-300"></div>
+          </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="grid sm:grid-cols-4 gap-4">
+          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+            <div class="flex items-center justify-between"><h3 class="text-slate-100 font-semibold">Virality</h3><span id="viralityLabel" class="text-xs px-2 py-0.5 rounded-md border border-slate-700 text-slate-300">—/100</span></div>
+            <div class="mt-3 h-2 rounded bg-slate-800 overflow-hidden"><div id="viralityBar" class="h-full w-0 bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-500 transition-all duration-500"></div></div>
+          </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+            <div class="flex items-center justify-between"><h3 class="text-slate-100 font-semibold">Title Score</h3><span id="titleScoreBadge" class="text-xs px-2 py-0.5 rounded-md border border-slate-700 text-slate-300">—/100</span></div>
+            <div class="mt-3 h-2 rounded bg-slate-800 overflow-hidden"><div id="titleBar" class="h-full w-0 bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-500 transition-all duration-500"></div></div>
+          </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+            <h3 class="text-slate-100 font-semibold">Projected Lift</h3>
+            <p class="text-slate-400 text-xs">If you apply our best rewrite</p>
+            <div class="mt-2 text-3xl font-extrabold text-emerald-400" id="liftNumber">+0%</div>
+          </div>
+          <div class="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+            <h3 class="text-slate-100 font-semibold">Readability</h3>
+            <div class="mt-2 text-slate-200 flex items-baseline gap-2">
+              <span id="readTime" class="text-xl font-bold">—</span>
+              <span class="text-xs text-slate-400">read • grade <span id="readGrade">—</span></span>
+            </div>
+            <div id="linkRisk" class="text-[11px] text-amber-300 mt-1"></div>
+          </div>
+        </div>
+
+        <!-- TABS -->
+        <div class="rounded-2xl border border-slate-800 bg-slate-900/60">
+          <div class="flex flex-wrap gap-2 p-3 border-b border-slate-800 text-sm">
+            <button class="tab-btn px-3 py-1.5 rounded-lg bg-red-600/20 text-red-200 border border-red-600/30" data-tab="subs">Subreddits</button>
+            <button class="tab-btn px-3 py-1.5 rounded-lg hover:bg-slate-800 border border-slate-700 text-slate-200" data-tab="titles">Titles</button>
+            <button class="tab-btn px-3 py-1.5 rounded-lg hover:bg-slate-800 border border-slate-700 text-slate-200" data-tab="times">Timing</button>
+            <button class="tab-btn px-3 py-1.5 rounded-lg hover:bg-slate-800 border border-slate-700 text-slate-200" data-tab="compliance">Compliance</button>
+            <button class="tab-btn px-3 py-1.5 rounded-lg hover:bg-slate-800 border border-slate-700 text-slate-200" data-tab="insights">Insights</button>
+          </div>
+
+          <div class="p-5 space-y-6">
+            <!-- Subs -->
+            <div id="tab-subs" class="tab-pane">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-slate-100">Recommended subreddits</h3>
+                <button id="applyBest" type="button" class="text-sm text-red-400 hover:underline">Apply best title →</button>
+              </div>
+
+              <div class="mt-4 grid gap-4">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="text-slate-300 text-sm">High-fit (based on content/topic)</div>
+                    <div id="subsPrimaryCount" class="text-[11px] muted">0</div>
+                  </div>
+                  <div id="subsListPrimary" class="grid gap-3"></div>
+                </div>
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="text-slate-300 text-sm">Discovered for you (validated)</div>
+                    <div id="subsDiscoverCount" class="text-[11px] muted">0</div>
+                  </div>
+                  <div id="subsListDiscover" class="grid gap-3"></div>
+                </div>
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <div class="text-slate-300 text-sm">Your seeds</div>
+                    <div id="subsSeedCount" class="text-[11px] muted">0</div>
+                  </div>
+                  <div id="subsListSeed" class="grid gap-3"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Titles -->
+            <div id="tab-titles" class="tab-pane hidden">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-slate-100">AI Title Rewrites</h3>
+                <button id="regenTitles" type="button" class="text-sm text-slate-300 hover:text-white">Regenerate</button>
+              </div>
+              <ul id="titles" class="mt-3 space-y-2"></ul>
+              <div class="mt-4 grid grid-cols-2 gap-3 text-xs text-slate-300">
+                <div id="featureLen" class="rounded-lg border border-slate-800 bg-slate-900/60 p-3">Length: —</div>
+                <div id="featureFlags" class="rounded-lg border border-slate-800 bg-slate-900/60 p-3">Features: —</div>
+              </div>
+              <ul id="titleIssues" class="mt-3 text-xs text-slate-400 space-y-1"></ul>
+            </div>
+
+            <!-- Times -->
+            <div id="tab-times" class="tab-pane hidden">
+              <h3 class="text-lg font-semibold text-slate-100">Best posting times</h3>
+              <div id="times" class="mt-3 grid sm:grid-cols-2 gap-3"></div>
+              <div id="window" class="text-xs text-slate-400 mt-2"></div>
+            </div>
+
+            <!-- Compliance -->
+            <div id="tab-compliance" class="tab-pane hidden">
+              <h3 class="text-lg font-semibold text-slate-100">Compliance</h3>
+              <ul id="checklist" class="mt-3 space-y-2"></ul>
+              <div id="riskScore" class="text-xs text-slate-400 mt-2"></div>
+
+              <div class="mt-6">
+                <h4 class="text-slate-100 font-medium mb-2">Rules by subreddit</h4>
+                <div id="rulesMatrix" class="grid gap-4"></div>
+              </div>
+            </div>
+
+            <!-- Insights -->
+            <div id="tab-insights" class="tab-pane hidden">
+              <h3 class="text-lg font-semibold text-slate-100">Additional insights</h3>
+              <ul id="tips" class="mt-3 space-y-2 list-disc list-inside text-slate-300"></ul>
+              <div class="mt-4">
+                <h4 class="text-slate-100 font-medium">Prime the thread (first comment)</h4>
+                <p id="firstComment" class="mt-2 text-slate-300 text-sm"></p>
+                <button id="copyComment" type="button" class="mt-2 text-xs px-3 py-1.5 rounded-md border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-800/80">Copy to clipboard</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </div>
+</main>
+
+<%- include('../partials/_footer') %>
+
+<script>
+(function () {
+  "use strict";
+
+  // Elements
+  const form = document.getElementById("analyzeForm");
+  const titleInput = document.getElementById("titleInput");
+  const contentInput = document.getElementById("contentInput");
+  const linkInput = document.getElementById("linkInput");
+  const audienceInput = document.getElementById("audienceInput");
+  const goalSelect = document.getElementById("goalSelect");
+  const toneSelect = document.getElementById("toneSelect");
+
+  const analyzeBtn = document.getElementById("analyzeBtn");
+  const btnText = analyzeBtn.querySelector(".btn-text");
+  const btnSpin = analyzeBtn.querySelector(".btn-spinner");
+  const improveTitleBtn = document.getElementById("improveTitleBtn");
+  const improveBodyBtn = document.getElementById("improveBodyBtn");
+  const regenBtn = document.getElementById("regenTitles");
+
+  const thinking = document.getElementById("thinking");
+  const thinkingBar = document.getElementById("thinkingBar");
+
+  const viralityBar = document.getElementById("viralityBar");
+  const viralityLabel = document.getElementById("viralityLabel");
+  const titleBar = document.getElementById("titleBar");
+  const titleScoreBadge = document.getElementById("titleScoreBadge");
+  const titleIssuesEl = document.getElementById("titleIssues");
+  const liftNumber = document.getElementById("liftNumber");
+
+  const subsPrimaryEl = document.getElementById("subsListPrimary");
+  const subsDiscoverEl = document.getElementById("subsListDiscover");
+  const subsSeedEl = document.getElementById("subsListSeed");
+  const subsPrimaryCt = document.getElementById("subsPrimaryCount");
+  const subsDiscoverCt = document.getElementById("subsDiscoverCount");
+  const subsSeedCt = document.getElementById("subsSeedCount");
+
+  const titlesEl = document.getElementById("titles");
+  const timesEl = document.getElementById("times");
+  const tipsEl = document.getElementById("tips");
+  const checklistEl = document.getElementById("checklist");
+  const firstComment = document.getElementById("firstComment");
+  const copyComment = document.getElementById("copyComment");
+  const windowEl = document.getElementById("window");
+  const riskScoreEl = document.getElementById("riskScore");
+  const rulesMatrixEl = document.getElementById("rulesMatrix");
+
+  // Tabs
+  const tabButtons = document.querySelectorAll(".tab-btn");
+  const panes = {
+    subs: document.getElementById("tab-subs"),
+    titles: document.getElementById("tab-titles"),
+    times: document.getElementById("tab-times"),
+    compliance: document.getElementById("tab-compliance"),
+    insights: document.getElementById("tab-insights"),
+  };
+  function setTab(name) {
+    Object.entries(panes).forEach(([k, el]) => el.classList.toggle("hidden", k !== name));
+    tabButtons.forEach(b => {
+      const active = b.dataset.tab === name;
+      b.className = "tab-btn px-3 py-1.5 rounded-lg " + (active
+        ? "bg-red-600/20 text-red-200 border border-red-600/30"
+        : "hover:bg-slate-800 border border-slate-700 text-slate-200");
+    });
+  }
+  tabButtons.forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
+  setTab("subs");
+
+  // Helpers
+  const glow  = (el, cls = "ring-2 ring-red-500/40") => { el.classList.add(cls); setTimeout(() => el.classList.remove(cls), 600); };
+  const badge = (text, cls) => `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] border ${cls}">${text}</span>`;
+
+  function scoreTitle(raw) {
+    const t = (raw || "").trim();
+    const issues = [];
+    if (!t) return { score: 0, issues: ["No title"], length: 0, hasNumber: false, hasBrackets: false, isQuestion: false };
+    let score = 50;
+    const len = t.length;
+    if (len >= 20 && len <= 80) { score += 15; } else if (len > 110 || len < 8) { score -= 12; issues.push("Length suboptimal"); }
+    if (/\d/.test(t)) score += 8; else issues.push("Consider a number");
+    if (/[\[\(]/.test(t)) score += 6; else issues.push("Add context with [ ] or ( )");
+    if (/\?/.test(t)) score += 5;
+    const letters = t.replace(/[^A-Za-z]/g, "");
+    if (letters) {
+      const caps = (t.match(/[A-Z]/g) || []).length;
+      const capRate = caps / letters.length;
+      if (capRate > 0.3) { score -= 10; issues.push("Too many caps"); }
+    }
+    if (/free|giveaway|guarantee|click/i.test(t)) { score -= 8; issues.push("Spammy phrasing"); }
+    score = Math.max(0, Math.min(100, Math.round(score)));
+    return { score, issues, length: len, hasNumber: /\d/.test(t), hasBrackets: /[\[\(]/.test(t), isQuestion: /\?/.test(t) };
+  }
+
+  function readStats(text) {
+    const w = (text.trim().match(/\b[\w’'-]+\b/g)||[]).length;
+    const s = (text.split(/[.!?]+/).filter(x => x.trim()).length) || 1;
+    const minutes = Math.max(0.2, w / 200);
+    const read = minutes < 1 ? `${Math.round(minutes*60)}s` : `${Math.round(minutes)}m`;
+    const avgLen = w / s;
+    const grade = avgLen < 12 ? "6–8" : avgLen < 16 ? "9–10" : avgLen < 20 ? "11–12" : "College";
+    return { read, grade };
+  }
+
+  function subCard(s, complianceMap) {
+    const subName = (s.name || "").replace(/^r\//,'');
+    const comp = complianceMap && complianceMap[`r/${subName}`];
+    const compBadge = comp
+      ? (comp.ok
+        ? badge(`Pass • ${comp.score}`, "border-emerald-700 text-emerald-300 bg-emerald-900/20")
+        : badge(`Issues ${comp.items?.filter(i=>!i.ok).length||0}`, "border-amber-700 text-amber-300 bg-amber-900/20"))
+      : "";
+
+    return `
+      <div class="cz-card p-3 rounded-xl bg-slate-900/50 border border-slate-800">
+        <div class="flex items-center justify-between gap-3">
+          <div>
+            <div class="text-slate-100 font-medium">r/${subName}</div>
+            ${s.reason ? `<div class="text-xs text-slate-400 mt-0.5">${s.reason}</div>` : ""}
+          </div>
+          <div class="flex items-center gap-2">
+            ${badge(String((s.estimated_engagement ?? 0)) + "/100", "border-slate-700 text-slate-300 bg-slate-800/50")}
+            ${compBadge}
+          </div>
+        </div>
+      </div>`;
+  }
+
+  // Quick body improver (local helpers)
+  function improveBodyOnce(text) {
+    const t = (text || "").trim();
+    if (!t) return t;
+    // Bulletize if long single block
+    if (!/\n- /.test(t) && t.split("\n").length < 3) {
+      const sent = t.split(/(?<=[.?!])\s+(?=[A-Z0-9])/).slice(0, 8);
+      return "• " + sent.join("\n• ");
+    }
+    // Tighten: trim long lines
+    return t.split("\n").map(line => line.length > 220 ? line.slice(0, 210).replace(/\s+\S*$/, "") + "…" : line).join("\n");
+  }
+
+  // Thinking / submit
+  let thinkerTimer = null;
+  function setThinking(active) {
+    if (active) {
+      thinking.classList.remove("hidden");
+      let pct = 0;
+      thinkerTimer = setInterval(()=>{ pct = Math.min(96, pct + 2 + Math.random()*3); thinkingBar.style.width = pct + "%"; }, 180);
+    } else {
+      clearInterval(thinkerTimer); thinkerTimer = null;
+      thinkingBar.style.width = "100%";
+      setTimeout(()=>{ thinking.classList.add("hidden"); thinkingBar.style.width = "0%"; }, 400);
+    }
+  }
+  function setSubmitting(s) {
+    analyzeBtn.disabled = s; improveTitleBtn.disabled = s; improveBodyBtn.disabled = s; if (regenBtn) regenBtn.disabled = s;
+    btnText.classList.toggle("hidden", s); btnSpin.classList.toggle("hidden", !s);
+  }
+
+  // Render
+  function render(data, originalTitle) {
+    // KPIs
+    const vir = Math.max(0, Math.min(100, Number(data?.virality_score || 0)));
+    viralityLabel.textContent = `${vir}/100`; viralityBar.style.width = `${vir}%`;
+
+    const scored = scoreTitle(originalTitle);
+    titleScoreBadge.textContent = `${scored.score}/100`; titleBar.style.width = `${scored.score}%`;
+    titleIssuesEl.innerHTML = scored.issues.length ? scored.issues.map(i => `<li>• ${i}</li>`).join("") : `<li class="text-slate-500">Looks solid.</li>`;
+    liftNumber.textContent = "+0%";
+
+    const rs = readStats(contentInput.value || "");
+    document.getElementById("readTime").textContent = rs.read;
+    document.getElementById("readGrade").textContent = rs.grade;
+    document.getElementById("linkRisk").textContent = (linkInput?.value || "").trim() ? "External link present: expect lower CTR unless value is crystal clear." : "";
+
+    // Sub lists
+    const primary   = data?.subreddit_recommendations || [];
+    const discover  = data?.discovered_subreddits || [];
+    const seeds     = (data?.seed_subreddits || []).map(n => ({ name: n, reason: "Your seed" }));
+
+    subsPrimaryEl.innerHTML  = primary.map(s => subCard(s, data?.compliance_by_subreddit)).join("") || `<div class="text-sm text-slate-400">No primary matches yet.</div>`;
+    subsDiscoverEl.innerHTML = discover.map(s => subCard(s, data?.compliance_by_subreddit)).join("") || `<div class="text-sm text-slate-400">No discoveries yet.</div>`;
+    subsSeedEl.innerHTML     = seeds.map(s => subCard(s, data?.compliance_by_subreddit)).join("") || `<div class="text-sm text-slate-400">No seeds provided.</div>`;
+
+    subsPrimaryCt.textContent  = primary.length;
+    subsDiscoverCt.textContent = discover.length;
+    subsSeedCt.textContent     = seeds.length;
+
+    // Titles
+    const variants = data?.title_variants || [];
+    titlesEl.innerHTML = variants.map((t) => {
+      const vs = scoreTitle(t.title || "");
+      const delta = vs.score - scored.score;
+      const hue = delta >= 10 ? "text-emerald-300 border-emerald-700 bg-emerald-900/20"
+               : delta >= 3  ? "text-amber-300 border-amber-700 bg-amber-900/20"
+               : "text-slate-300 border-slate-700 bg-slate-800/40";
+      return `
+        <li class="p-3 rounded-lg bg-slate-900/50 border border-slate-800">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="text-slate-100 font-medium">${t.title}</div>
+              <div class="text-xs text-slate-400 mt-1">${t.why || ""}</div>
+              <div class="mt-1 text-[11px]">
+                ${badge("title+" + vs.score, "border-slate-700 text-slate-300 bg-slate-800/50")}
+                ${badge((t.tone || "match"), "border-slate-700 text-slate-300 bg-slate-800/50")}
+                ${badge((delta >= 0 ? "+" : "") + String(delta) + " pts", hue)}
+              </div>
+            </div>
+            <div class="shrink-0 flex flex-col items-end gap-2">
+              <button data-apply-title="${encodeURIComponent(t.title || "")}" class="px-2 py-1 text-xs rounded-md border border-red-600/30 bg-red-600/15 text-red-200 hover:bg-red-600/25">Apply</button>
+              <button data-apply-analyze="${encodeURIComponent(t.title || "")}" class="px-2 py-1 text-xs rounded-md border border-slate-700 bg-slate-800 text-slate-200 hover:bg-slate-800/80">Apply + Re-analyze</button>
+            </div>
+          </div>
+        </li>`;
+    }).join("") || `<div class="text-sm text-slate-400">No title variants returned.</div>`;
+
+    // Times
+    const bt = data?.best_times || [];
+    timesEl.innerHTML = bt.map(t => `
+      <div class="p-3 rounded-lg bg-slate-900/50 border border-slate-800">
+        <div class="flex items-center justify-between">
+          <div class="text-slate-100 font-medium">${t.subreddit}</div>
+          ${badge("conf " + Math.round((t.confidence ?? 0) * 100) + "%", "border-slate-700 text-slate-300 bg-slate-800/50")}
+        </div>
+        <div class="text-sm text-slate-300 mt-1">${(t.times_local || []).join(" · ")}</div>
+      </div>
+    `).join("") || `<div class="text-sm text-slate-400">No timing guidance returned.</div>`;
+
+    if (bt.length) {
+      const slots = bt.flatMap(x => (x.times_local || []));
+      const first = slots[0], last = slots[slots.length-1];
+      windowEl.textContent = (first && last) ? `Typical window: ${first} → ${last}` : "";
+    } else { windowEl.textContent = ""; }
+
+    // Global checklist
+    const items = data?.compliance_checklist || [];
+    checklistEl.innerHTML = items.map(c => `
+      <li class="flex items-start gap-2">
+        <span class="mt-0.5">${c.ok ? "✅" : "⚠️"}</span>
+        <div>
+          <div class="text-slate-200 text-sm">${c.item}</div>
+          ${c.note ? `<div class="text-xs text-slate-400">${c.note}</div>` : ""}
+        </div>
+      </li>
+    `).join("") || `<div class="text-sm text-slate-400">No checklist returned.</div>`;
+    riskScoreEl.textContent = `Rule risk: ${items.filter(i => !i.ok).length} potential issues`;
+
+    // Insights + first comment
+    tipsEl.innerHTML = (data?.formatting_tips || []).map(t => `<li>${t}</li>`).join("") || `<div class="text-sm text-slate-400">No tips returned.</div>`;
+    firstComment.textContent = data?.first_comment_suggestion || "—";
+
+    // Rules matrix (per-sub rules)
+    (function renderRulesMatrix() {
+      const compMap = data?.compliance_by_subreddit || {};
+      const entries = Object.entries(compMap);
+      if (!entries.length) {
+        rulesMatrixEl.innerHTML = `<div class="text-sm text-slate-400">No subreddit rules available. Connect Reddit and re-run, or add seed subreddits.</div>`;
+        return;
+      }
+      function ico(outcome){ return outcome==="ok"?"✅": outcome==="warn"?"⚠️": outcome==="fail"?"❌":"ℹ️"; }
+      function label(outcome){ return outcome==="ok"?"Pass": outcome==="warn"?"Attention": outcome==="fail"?"Blocker":"Info"; }
+      function chip(text, cls){ return `<span class="inline-flex items-center text-[11px] px-2 py-0.5 rounded-md border ${cls}">${text}</span>`; }
+
+      rulesMatrixEl.innerHTML = entries.map(([sub, comp]) => {
+        const subName = sub.replace(/^r\//,'');
+        const rules = comp?.rules_eval || [];
+        const headChip = comp?.ok
+          ? chip(`Pass • ${comp.score}`, "border-emerald-700 text-emerald-300 bg-emerald-900/20")
+          : chip(`Issues ${comp?.items?.filter(i=>!i.ok).length||0}`, "border-amber-700 text-amber-300 bg-amber-900/20");
+
+        const reqs = comp?.reqs || null;
+        const quickReqs = [];
+        if (reqs?.title_text_min_length) quickReqs.push(`Title ≥ ${reqs.title_text_min_length}`);
+        if (reqs?.title_text_max_length) quickReqs.push(`Title ≤ ${reqs.title_text_max_length}`);
+        if (reqs?.body_restriction_policy) quickReqs.push(`Body: ${reqs.body_restriction_policy}`);
+        if (reqs?.is_flair_required) quickReqs.push("Flair required");
+        if (Array.isArray(reqs?.domain_whitelist) && reqs.domain_whitelist.length) quickReqs.push("Domain whitelist");
+        if (Array.isArray(reqs?.domain_blacklist) && reqs.domain_blacklist.length) quickReqs.push("Domain blacklist");
+
+        const reqBlock = `
+          <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+            <div class="font-medium text-slate-200 mb-1">Submission requirements</div>
+            ${quickReqs.length
+              ? `<ul class="list-disc list-inside text-xs text-slate-300 space-y-1">${quickReqs.map(x=>`<li>${x}</li>`).join("")}</ul>`
+              : `<div class="text-xs text-slate-400">No explicit submit-time requirements published.</div>`}
+          </div>`;
+
+        const rulesList = rules.length
+          ? `<ol class="space-y-2">
+              ${rules.map(r => `
+                <li class="rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+                  <div class="text-sm text-slate-100 flex items-center gap-2">
+                    <span>${ico(r.outcome)}</span>
+                    <span class="font-medium min-w-0 truncate">${r.title}</span>
+                    ${chip(label(r.outcome),
+                      r.outcome === "ok"   ? "border-emerald-700 text-emerald-300 bg-emerald-900/20" :
+                      r.outcome === "fail" ? "border-rose-700 text-rose-300 bg-rose-900/20"       :
+                      r.outcome === "warn" ? "border-amber-700 text-amber-300 bg-amber-900/20"     :
+                                             "border-slate-700 text-slate-300 bg-slate-800/50")}
+                  </div>
+                  <div class="text-xs text-slate-300 mt-1">
+                    ${r.note ? r.note : (r.description || "").slice(0, 360)}
+                  </div>
+                </li>`).join("")}
+            </ol>`
+          : `<div class="text-sm text-slate-400">No rules published.</div>`;
+
+        return `
+          <div class="p-4 rounded-xl bg-slate-900/50 border border-slate-800">
+            <div class="flex items-center justify-between">
+              <div class="text-slate-100 font-semibold">r/${subName}</div>
+              <div class="flex items-center gap-2">${headChip}</div>
+            </div>
+            <div class="mt-3 grid gap-3">
+              ${reqBlock}
+              ${rulesList}
+            </div>
+          </div>`;
+      }).join("");
+    })();
+
+    // Apply buttons for titles
+    titlesEl.querySelectorAll("[data-apply-title]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const v = decodeURIComponent(btn.getAttribute("data-apply-title") || "");
+        if (!v) return;
+        titleInput.value = v;
+        const s = scoreTitle(v);
+        titleScoreBadge.textContent = `${s.score}/100`; titleBar.style.width = `${s.score}%`;
+        titleIssuesEl.innerHTML = s.issues.map(i => `<li>• ${i}</li>`).join("") || `<li class="text-slate-500">Looks solid.</li>`;
+        glow(titleInput);
+      });
+    });
+    titlesEl.querySelectorAll("[data-apply-analyze]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const v = decodeURIComponent(btn.getAttribute("data-apply-analyze") || "");
+        if (!v) return;
+        titleInput.value = v; glow(titleInput); runAnalyze();
+      });
+    });
+  }
+
+  async function runAnalyze(extra = {}) {
+    const payload = {
+      title: (titleInput.value || "").trim(),
+      content: (contentInput.value || "").trim(),
+      link: (linkInput?.value || "").trim(),
+      goal: (goalSelect?.value || "discussion"),
+      tone: (toneSelect?.value || "friendly"),
+      audience: (audienceInput?.value || "").trim(),
+      subreddits: (document.getElementById("subsInput")?.value || "").trim(),
+      ...extra
+    };
+
+    setSubmitting(true); setThinking(true);
+    try {
+      const resp = await fetch("/analyzer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const ct = resp.headers.get("content-type") || "";
+      if (!ct.includes("application/json")) throw new Error("Session expired or unexpected response");
+      const json = await resp.json();
+      if (!json.ok) throw new Error(json.error || "Analyzer failed");
+      render(json.data, payload.title);
+      if (window.showToast) window.showToast("Analysis updated");
+    } catch (e) {
+      console.error(e);
+      if (window.showToast) window.showToast(e.message || "Analyzer failed");
+    } finally {
+      setSubmitting(false); setThinking(false);
+    }
+  }
+
+  // Improve title local transforms
+  document.querySelectorAll("button[data-transform]").forEach(btn =>
+    btn.addEventListener("click", () => {
+      const mode = btn.dataset.transform;
+      let t = (titleInput.value || "").trim(); if (!t) return;
+      if (mode === "shorten" && t.length > 80) t = t.slice(0, 80).replace(/\s+\S*$/, "") + "…";
+      if (mode === "numbers" && !/\d/.test(t)) t = t.replace(/(^|\b)(we|I)\b/i, "$1We") + " (3 takeaways)";
+      if (mode === "question" && !/\?$/.test(t)) t = t.replace(/\.*$/, "") + "?";
+      if (mode === "brackets" && !/[\[\(]/.test(t)) t = t + " [what we learned]";
+      titleInput.value = t;
+      const s = scoreTitle(t);
+      titleScoreBadge.textContent = `${s.score}/100`; titleBar.style.width = `${s.score}%`;
+      titleIssuesEl.innerHTML = s.issues.map(i => `<li>• ${i}</li>`).join("") || `<li class="text-slate-500">Looks solid.</li>`;
+      glow(titleInput);
+    })
+  );
+
+  // One-click improvers
+  improveTitleBtn.addEventListener("click", () => {
+    let t = (titleInput.value || "").trim();
+    if (!t) return;
+    if (!/\d/.test(t)) t += " (3 lessons)";
+    if (!/[\[\(]/.test(t)) t += " [results]";
+    titleInput.value = t;
+    const s = scoreTitle(t);
+    titleScoreBadge.textContent = `${s.score}/100`; titleBar.style.width = `${s.score}%`;
+    titleIssuesEl.innerHTML = s.issues.map(i => `<li>• ${i}</li>`).join("") || `<li class="text-slate-500">Looks solid.</li>`;
+    glow(titleInput);
+  });
+
+  improveBodyBtn.addEventListener("click", () => {
+    const v = contentInput.value || "";
+    const improved = improveBodyOnce(v);
+    contentInput.value = improved;
+    glow(contentInput);
+  });
+
+  if (regenBtn) regenBtn.addEventListener("click", () => runAnalyze({ tone: (toneSelect?.value || "friendly") }));
+
+  copyComment.addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(firstComment.textContent || ""); if (window.showToast) window.showToast("Copied first comment"); } catch {}
+  });
+
+  // Submit
+  form.addEventListener("submit", (e) => { e.preventDefault(); runAnalyze(); });
+
+  // Initial title score
+  const init = (function(raw){ const t=(raw||"").trim(); const issues=[]; if(!t) return {score:0,issues:["No title"],length:0,hasNumber:false,hasBrackets:false,isQuestion:false}; let score=50; const len=t.length; if(len>=20&&len<=80){score+=15;} else if(len>110||len<8){score-=12;issues.push("Length suboptimal");} if(/\d/.test(t)) score+=8; else issues.push("Consider a number"); if(/[\[\(]/.test(t)) score+=6; else issues.push("Add context with [ ] or ( )"); if(/\?/.test(t)) score+=5; const letters=t.replace(/[^A-Za-z]/g,""); if(letters){const caps=(t.match(/[A-Z]/g)||[]).length; const capRate=caps/letters.length; if(capRate>0.3){score-=10;issues.push("Too many caps");}} if(/free|giveaway|guarantee|click/i.test(t)){score-=8;issues.push("Spammy phrasing");} score=Math.max(0,Math.min(100,Math.round(score))); return {score,issues,length:len,hasNumber:/\d/.test(t),hasBrackets:/[\[\(]/.test(t),isQuestion:/\?/.test(t)}; })(titleInput.value);
+  titleScoreBadge.textContent = `${init.score}/100`; titleBar.style.width = `${init.score}%`;
+  titleIssuesEl.innerHTML = init.issues.map(i => `<li>• ${i}</li>`).join("") || `<li class="text-slate-500">Looks solid.</li>`;
+})();
+</script>

@@ -1,0 +1,9 @@
+<!-- src/views/pages/500.ejs -->
+<!doctype html>
+<html><body style="font-family:system-ui;background:#0b1220;color:#e2e8f0;padding:3rem">
+  <h1 style="font-weight:700;font-size:2rem;margin:0">500 — Server Error</h1>
+  <p style="opacity:.8;margin-top:.5rem">Something went wrong.</p>
+  <% if (error && process.env.NODE_ENV === 'development') { %>
+    <pre style="margin-top:1rem;background:#111827;padding:1rem;border-radius:.5rem;overflow:auto"><%= error.stack || JSON.stringify(error, null, 2) %></pre>
+  <% } %>
+</body></html>
